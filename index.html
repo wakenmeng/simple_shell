@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件管理</title>
+    <script type="text/javascript" src="jquery.js"></script>
+</head>
+<style type="text/css">
+    .show {
+        width: 300px;
+        height: 300px;
+        border: 1px solid red;
+    }
+</style>
+<body>
+<div class="container">
+    <div class="content">
+        <input id="shell" type="text" />
+    </div>
+    <div class="show">
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    var shell = {
+        lsFile: function(cur) {
+        },
+        cdFile: function(cur) {
+        },
+        mkdirFile: function(cur) {
+        },
+        query: function(url, data) {
+            $.ajax({
+                url: url,
+                data: {data: data},
+                method: 'post',
+                success: function(msg) {
+                    console.log(msg);
+                },
+                error: function(msg) {
+                    console.log(msg);
+                }
+            });
+        }
+    };
+    $(function() {
+        $('#shell').on('keyup', function(e) {
+            var value = $('#shell').val();
+            if (e.keyCode === 13) {
+                if (value.toLowerCase() === 'ls' ) {
+                    shell.lsFile();
+                } else if (value.toLowerCase().indexOf('cd') !== -1) {
+                    shell.cdFile();
+                } else if (value.toLowerCase().indexOf('mkdir') !== -1) {
+                    shell.mkdirFile();
+                }
+            }
+        });
+    });
+</script>
+</html>
