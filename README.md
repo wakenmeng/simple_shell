@@ -1,10 +1,10 @@
 Simple Shell
-=================================
-简单的unix文件系统和shell界面，文件存储
-### 文件类型
-		type
-文件夹	0
-文件 	1
+===============================
+unix shell and file system
+###
+
+cammand: ls cd mkdir(unfinished)
+type file:1 direcotry: 0
 
 ### 文件存储结构
 

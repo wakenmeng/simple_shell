@@ -7,17 +7,32 @@
 </head>
 <style type="text/css">
     .show {
-        width: 300px;
-        height: 300px;
+        width: 100%;
         border: 1px solid red;
+        color:white;
+    }
+    html,body,.content{
+        width:100%;
+        height:100%;
+        padding:0;
+        margin:0;
+        background: black;
+    }
+    #shell{
+        -moz-appearance:none;
+        background: transparent;
+        border:none;
+    }
+    .input{
+        color:white;
     }
 </style>
 <body>
 <div class="container">
-    <div class="content">
-        <input id="shell" type="text" />
-    </div>
     <div class="show">
+    </div>
+    <div class="content">
+        <p class = "input">&gt;<input id="shell" type="text" style="color:white" />
     </div>
 </div>
 </body>
@@ -27,53 +42,92 @@
            shell.query('file.php',{
             'type':'ls',
             'data':{
-                curlvl:cur.curLvl,
-                pid:cur.pId
+                curlvl:cur.curlvl,
+                id:cur.id
             }
-           }) 
+           });
+           
         },
-        cdFile: function(cur) {
-
+        cdFile: function(cur,arg) {
+            shell.query('file.php',{
+                'type':'cd',
+                'data':{
+                    curlvl:cur.curlvl,
+                    id:cur.id,
+                    pid:cur.pid,
+                    arg:arg
+                }
+            })
         },
         mkdirFile: function(cur) {
         },
         query: function(url, data) {
+            console.log(data);
             $.ajax({
                 url: url,
                 data:data,
                 method: 'post',
                 success: function(msg) {
-                    var result="";
-                    var ob=JSON.parse(msg);
-                    for (var i = ob.length - 1; i >= 0; i--) {
-                        if(ob[i]["type"]==0)
-                        result+="<b>"+ob[i]["name"]+"</b>&nbsp";
-                        else 
-                        result+=ob[i]["name"]+" ";
-                    };
-                    result+="<br>";
-                    $(".show").append(result);
-                    console.log(result);
+                            ob=JSON.parse(msg);
+                            console.log(ob.length);
+                             var result="<br>";
+                             switch(data['type']){
+                                case "ls":
+                                    for (var i = ob.length - 1; i >= 0; i--) {
+                                            if(ob[i]["type"]==0)
+                                            result+="<b>"+ob[i]["name"]+"</b>&nbsp";
+                                            else 
+                                            result+=ob[i]["name"]+" ";
+                                        };
+                                        $(".show").append(result);
+                                        break;
+                                case "cd":
+                                    if(ob.length!=0){
+                                        if (ob.er!=undefined){
+                                             $(".show").append("<br>cd:"+data['data'].arg+ob.er);
+                                        }
+                                        else if(ob.length!=0){
+                                            shell.curPos=ob;
+                                        }
+                                   }
+                                    console.log(shell.curPos);
+                                    break;       
+
+                             }
+                              
                 },
                 error: function(msg) {
                     console.log(msg);
                 }
             });
         },
-        curPath:{curLvl:0,pId:1}
-
+        curPos:{id:-1,name:"/",curlvl:0,type:0,pid:-1},//当前路径
+        curPath:['/'],
+        usr:"meng@hit"
     };
     $(function() {
         $('#shell').on('keyup', function(e) {
             var value = $('#shell').val();
             if (e.keyCode === 13) {
-                if (value.toLowerCase() === 'ls' ) {
-                    shell.lsFile(shell.curPath);
-                } else if (value.toLowerCase().indexOf('cd') !== -1) {
-                    
-                    shell.cdFile();
-                } else if (value.toLowerCase().indexOf('mkdir') !== -1) {
-                    shell.mkdirFile();
+                if(value.search(' ')!=-1){
+                    var cmd = value.substr(0,value.search(' '));
+                    var args = value.substr(value.search(' ')+1,value.length).split(' ');
+                }
+                else{
+                    var cmd = value;
+                    var args = [];
+                }
+                switch(cmd){
+                    case 'ls':
+                        shell.lsFile(shell.curPos);
+                        break;
+                    case 'cd':
+                        shell.cdFile(shell.curPos,args[0]);
+                        break;
+                    case 'mkdir':
+                        break;
+                    default:
+                        break;
                 }
                 $(this).val('');
             }
