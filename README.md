@@ -3,7 +3,7 @@ Simple Shell
 unix shell and file system
 ###
 
-cammand: ls cd mkdir(unfinished)
+cammand: ls cd mkdir
 type file:1 direcotry: 0
 
 ### 文件存储结构

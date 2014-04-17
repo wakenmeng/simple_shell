@@ -11,20 +11,13 @@ switch($type) {
         //echo json_encode();
         break;
     case "mkdir":
+        echo json_encode(fun_mkdir($data));
         //echo json_encode();
         break;
     default: 
         break;
 }
  
-
-function deal_map() {
-    $fd = fopen('map.txt', 'r');
-    $result = fread($fd, filesize('map.txt'));
-    //$line = explode('\n', $result);
-    $result = explode(' ', $result);
-    var_dump($result);
-}
 function fun_ls($pid) {
     $res=array();
     $final =array();
@@ -44,11 +37,9 @@ function fun_ls($pid) {
             array_push($final,$res);
             $res=array();
         }
-       // var_dump($re);
-
-        //var_dump($re[4]);
 
     }
+    fclose($fd);
     return $final;
 }
 function fun_cd($data){
@@ -60,6 +51,7 @@ function fun_cd($data){
     $line = explode("\n",$read);
     if($arg==".."){
         if($data['pid']==-1){
+            fclose($fd);
             return $res;
         } 
         else
@@ -96,10 +88,16 @@ function fun_cd($data){
         if(empty($res))
             $res['er']=":No such file or directory";
     }
+    fclose($fd);
     return $res;
 }
-
-function insert_map() {
-    $fd = fopen('map.txt', 'w');
+function fun_mkdir($data)
+{
+    $id=$data['id'];
+    $arg=$data['arg'];
+    $line=count(file('map.txt'));
+    $string = "\n".$line." ".$arg." ".'0'." ".'0'." ".$id;
+    file_put_contents('map.txt',$string,FILE_APPEND);
+    return '';
 }
 ?>

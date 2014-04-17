@@ -32,7 +32,8 @@
     <div class="show">
     </div>
     <div class="content">
-        <p class = "input">&gt;<input id="shell" type="text" style="color:white" />
+        <span class = "input">meng@hit:/&gt;</span>
+            <input id="shell" type="text" style="color:white" />
     </div>
 </div>
 </body>
@@ -59,7 +60,21 @@
                 }
             })
         },
-        mkdirFile: function(cur) {
+        mkdirFile: function(cur,arg) {
+            console.log(arg);
+            if(arg=='')
+            {
+                $(".show").append("<br>mkdir: missing operand");
+            }
+            else
+                shell.query('file.php',{
+                    'type':'mkdir',
+                    'data':{
+                        id:cur.id,
+                        pid:cur.pid,
+                        arg:arg
+                    }
+                });
         },
         query: function(url, data) {
             console.log(data);
@@ -70,28 +85,38 @@
                 success: function(msg) {
                             ob=JSON.parse(msg);
                             console.log(ob.length);
-                             var result="<br>";
+                             var result="";
                              switch(data['type']){
                                 case "ls":
                                     for (var i = ob.length - 1; i >= 0; i--) {
                                             if(ob[i]["type"]==0)
-                                            result+="<b>"+ob[i]["name"]+"</b>&nbsp";
+                                            result+="<b style='color:green'>"+ob[i]["name"]+"</b>&nbsp";
                                             else 
                                             result+=ob[i]["name"]+" ";
                                         };
-                                        $(".show").append(result);
+                                        $(".show").append(result+"<br>");
                                         break;
                                 case "cd":
                                     if(ob.length!=0){
                                         if (ob.er!=undefined){
-                                             $(".show").append("<br>cd:"+data['data'].arg+ob.er);
+                                             $(".show").append("cd:"+data['data'].arg+ob.er+"<br>");
                                         }
                                         else if(ob.length!=0){
                                             shell.curPos=ob;
+                                            if(data['data'].arg=="..")
+                                                shell.curPath.pop();
+                                            else
+                                            shell.curPath.push(ob.name);
                                         }
                                    }
-                                    console.log(shell.curPos);
+                                   $('.input').text(shell.usr+shell.curPath.join('/')+">");
+                                    console.log(shell.curPath);
                                     break;       
+                                case "mkdir":
+                                    break;
+                                default:
+                                    $(".show").append(data['data'].arg+"command not found"+"<br>");
+                                    break;
 
                              }
                               
@@ -101,14 +126,17 @@
                 }
             });
         },
-        curPos:{id:-1,name:"/",curlvl:0,type:0,pid:-1},//当前路径
+        curPos:{id:0,name:"/",curlvl:0,type:0,pid:-1},//当前路径
         curPath:['/'],
-        usr:"meng@hit"
+        usr:"meng@hit:",
+        history:[]
     };
     $(function() {
         $('#shell').on('keyup', function(e) {
             var value = $('#shell').val();
             if (e.keyCode === 13) {
+            $(".show").append(shell.usr+shell.curPath.join('/')+" "+value+"<br>");
+            shell.history.push(value);
                 if(value.search(' ')!=-1){
                     var cmd = value.substr(0,value.search(' '));
                     var args = value.substr(value.search(' ')+1,value.length).split(' ');
@@ -125,6 +153,7 @@
                         shell.cdFile(shell.curPos,args[0]);
                         break;
                     case 'mkdir':
+                        shell.mkdirFile(shell.curPos,args[0]);
                         break;
                     default:
                         break;
