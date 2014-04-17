@@ -8,23 +8,27 @@
 <style type="text/css">
     .show {
         width: 100%;
-        border: 1px solid red;
         color:white;
     }
-    html,body,.content{
+        html,body,.content{
         width:100%;
         height:100%;
         padding:0;
         margin:0;
         background: black;
     }
+    .content label{
+        float:left;
+    }
     #shell{
-        -moz-appearance:none;
         background: transparent;
-        border:none;
+        border:medium none;
+        border-style: none;
+        -webkiz-appearance:none;
     }
     .input{
         color:white;
+        float:left;
     }
 </style>
 <body>
@@ -32,12 +36,15 @@
     <div class="show">
     </div>
     <div class="content">
-        <span class = "input">meng@hit:/&gt;</span>
-            <input id="shell" type="text" style="color:white" />
+        <div style="width:100%"><label class = "input">meng@hit:/&gt;</label>
+            <input id="shell" type="text" style="color: white; width: 60%; display: block;" >
+        </div>
     </div>
 </div>
 </body>
 <script type="text/javascript">
+    $('#shell').focus();
+    $('#shell').select();
     var shell = {
         lsFile: function(cur) {
            shell.query('file.php',{
@@ -53,7 +60,6 @@
             shell.query('file.php',{
                 'type':'cd',
                 'data':{
-                    curlvl:cur.curlvl,
                     id:cur.id,
                     pid:cur.pid,
                     arg:arg
@@ -61,7 +67,6 @@
             })
         },
         mkdirFile: function(cur,arg) {
-            console.log(arg);
             if(arg=='')
             {
                 $(".show").append("<br>mkdir: missing operand");
@@ -71,13 +76,13 @@
                     'type':'mkdir',
                     'data':{
                         id:cur.id,
+                        lvl:cur.curlvl,
                         pid:cur.pid,
                         arg:arg
                     }
                 });
         },
         query: function(url, data) {
-            console.log(data);
             $.ajax({
                 url: url,
                 data:data,
@@ -85,6 +90,7 @@
                 success: function(msg) {
                             ob=JSON.parse(msg);
                             console.log(ob.length);
+                            console.log(ob);
                              var result="";
                              switch(data['type']){
                                 case "ls":
@@ -97,22 +103,31 @@
                                         $(".show").append(result+"<br>");
                                         break;
                                 case "cd":
-                                    if(ob.length!=0){
                                         if (ob.er!=undefined){
-                                             $(".show").append("cd:"+data['data'].arg+ob.er+"<br>");
+                                             $(".show").append("cd:"+ob.er+"<br>");
                                         }
                                         else if(ob.length!=0){
-                                            shell.curPos=ob;
-                                            if(data['data'].arg=="..")
+                                            if(data['data'].arg=="..") //cd ..
                                                 shell.curPath.pop();
-                                            else
-                                            shell.curPath.push(ob.name);
+                                            else{
+                                                    var tmpi=0;
+                                                if (data['data'].arg.search('/')==0) {
+                                                    shell.curPath=[''];
+                                                    tmpi=1;
+                                                }
+                                                for ( ; tmpi <= ob.length - 1; tmpi++) {
+                                                shell.curPath.push(ob[tmpi].name);
+                                                };
+                                            }
+                                            shell.curPos=ob[ob.length-1];
+
                                         }
-                                   }
                                    $('.input').text(shell.usr+shell.curPath.join('/')+">");
-                                    console.log(shell.curPath);
                                     break;       
                                 case "mkdir":
+                                    if(ob.er!=undefined){
+                                        $(".show").append(ob.er+"<br>");
+                                    }
                                     break;
                                 default:
                                     $(".show").append(data['data'].arg+"command not found"+"<br>");
@@ -127,7 +142,7 @@
             });
         },
         curPos:{id:0,name:"/",curlvl:0,type:0,pid:-1},//当前路径
-        curPath:['/'],
+        curPath:[''],
         usr:"meng@hit:",
         history:[]
     };
@@ -140,6 +155,7 @@
                 if(value.search(' ')!=-1){
                     var cmd = value.substr(0,value.search(' '));
                     var args = value.substr(value.search(' ')+1,value.length).split(' ');
+                    console.log(args.length);
                 }
                 else{
                     var cmd = value;
