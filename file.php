@@ -17,7 +17,14 @@ switch($type) {
     default: 
         break;
 }
-//处理ls命令
+/**
+*ls命令
+*
+*实现ls命令，查看当前文件夹下的文件
+*
+*@param int $pid 当前目录的id也是目标文件的父id
+*@return array $final 结果列表，每个元素都是一个文件对象
+*/
 function fun_ls($pid) {
     $res=array();
     $final =array();
@@ -42,7 +49,15 @@ function fun_ls($pid) {
     fclose($fd);
     return $final;
 }
-//处理cd命令，分为绝对路径，相对路径和cd ..返回上一级
+/**
+*cd命令
+*
+*实现cd命令，查看当前文件夹下的文件
+*
+*@param array $data 数组，包括当前目录，目标参数
+*@return array $final 结果文件
+*@return array $res 如果结果中包含er,说明异常
+*/
 function fun_cd($data){
     $pid = $data['id'];
     $arg = explode('/',$data['arg']);
@@ -117,7 +132,14 @@ function fun_cd($data){
     fclose($fd);
     return $final;
 }
-//处理mkdir命令
+/**
+*mkdir命令
+*
+*实现mkdir命令，查看当前文件夹下的文件
+*
+*@param array $data 数组，包括当前目录，目标参数
+*@return array $res['er'] 如果有错误：重名文件夹，则报错
+*/
 function fun_mkdir($data)
 {
     $pid=$data['id'];
