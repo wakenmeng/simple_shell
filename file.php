@@ -1,6 +1,6 @@
 <?php
-$type = $_POST["type"];
-$data = $_POST["data"];
+$type = $_POST["type"];//命令
+$data = $_POST["data"];//命令参数，当前位置等
 
 switch($type) {
     case "ls":
@@ -17,7 +17,7 @@ switch($type) {
     default: 
         break;
 }
- 
+//处理ls命令
 function fun_ls($pid) {
     $res=array();
     $final =array();
@@ -42,6 +42,7 @@ function fun_ls($pid) {
     fclose($fd);
     return $final;
 }
+//处理cd命令，分为绝对路径，相对路径和cd ..返回上一级
 function fun_cd($data){
     $pid = $data['id'];
     $arg = explode('/',$data['arg']);
@@ -55,6 +56,7 @@ function fun_cd($data){
     $fd = fopen('map.txt', 'r');
     $read = fread($fd,filesize('map.txt'));
     $line = explode("\n",$read);
+    //处理cd ..
     if(count($arg)==1 && $arg[0]==".."){
         if($data['pid']==-1){
             fclose($fd);
@@ -77,6 +79,7 @@ function fun_cd($data){
         }
     }
     else{
+        //处理绝对和相对路径
         foreach ($arg as $dir) {
             foreach($line as $l)
             {
@@ -84,6 +87,7 @@ function fun_cd($data){
                 if((int)$re[4]==(int)$pid && $re[1]==$dir)
                 {
                     if((int)$re[3]==1){
+                        //判错，并非文件夹
                         fclose($fd);
                         $res['er']=":Not a directory";
                         return $res;
@@ -101,6 +105,7 @@ function fun_cd($data){
                 }
             }
         if(empty($final)){
+            //判错，目标或目标路径中的文件不存在
             fclose($fd);
             $res['empty']=$dir;
            $res['er']=$dir.":No such file or directory";
@@ -112,11 +117,12 @@ function fun_cd($data){
     fclose($fd);
     return $final;
 }
+//处理mkdir命令
 function fun_mkdir($data)
 {
     $pid=$data['id'];
     $arg=$data['arg'];
-    //判重
+    //判重，声明文件夹是否已有重名文件夹存在
     $fd=fopen('map.txt','r');
     $read = fread($fd, filesize('map.txt'));
     $line = explode("\n",$read);

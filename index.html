@@ -89,8 +89,6 @@
                 method: 'post',
                 success: function(msg) {
                             ob=JSON.parse(msg);
-                            console.log(ob.length);
-                            console.log(ob);
                              var result="";
                              switch(data['type']){
                                 case "ls":
@@ -111,7 +109,7 @@
                                                 shell.curPath.pop();
                                             else{
                                                     var tmpi=0;
-                                                if (data['data'].arg.search('/')==0) {
+                                                if (data['data'].arg.search('/')==0) {//cd绝对路径
                                                     shell.curPath=[''];
                                                     tmpi=1;
                                                 }
@@ -122,8 +120,8 @@
                                             shell.curPos=ob[ob.length-1];
 
                                         }
-                                   $('.input').text(shell.usr+shell.curPath.join('/')+">");
-                                    break;       
+                                        $('.input').text(shell.usr+shell.curPath.join('/')+">");
+                                        break;       
                                 case "mkdir":
                                     if(ob.er!=undefined){
                                         $(".show").append(ob.er+"<br>");
@@ -141,21 +139,22 @@
                 }
             });
         },
-        curPos:{id:0,name:"/",curlvl:0,type:0,pid:-1},//当前路径
-        curPath:[''],
+        curPos:{id:0,name:"/",curlvl:0,type:0,pid:-1},//当前位置
+        curPath:[''],//当前路径
         usr:"meng@hit:",
-        history:[]
+        HISTORY:[],//历史
+        indexOfHis:0
     };
     $(function() {
         $('#shell').on('keyup', function(e) {
             var value = $('#shell').val();
             if (e.keyCode === 13) {
             $(".show").append(shell.usr+shell.curPath.join('/')+" "+value+"<br>");
-            shell.history.push(value);
+            shell.HISTORY.push(value);
+            shell.indexOfHis=shell.HISTORY.length;
                 if(value.search(' ')!=-1){
                     var cmd = value.substr(0,value.search(' '));
                     var args = value.substr(value.search(' ')+1,value.length).split(' ');
-                    console.log(args.length);
                 }
                 else{
                     var cmd = value;
@@ -176,6 +175,20 @@
                 }
                 $(this).val('');
             }
+            //上下键查看历史指令
+        else if(e.keyCode===38){
+            if(shell.indexOfHis>0){
+                $("#shell").val(shell.HISTORY[shell.indexOfHis-1]);
+                shell.indexOfHis--;
+            }
+        }
+        else if(e.keyCode===40){
+            if(shell.indexOfHis<shell.HISTORY.length){
+                shell.indexOfHis++;
+                $("#shell").val(shell.HISTORY[shell.indexOfHis]);
+            }
+        }
+        console.log(shell.indexOfHis);
         });
     });
 </script>
